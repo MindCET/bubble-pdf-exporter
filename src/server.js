@@ -13,13 +13,22 @@ app.get('/', (req, res) => {
 app.post('/export-pdf', async (req, res) => {
   const { styles = {}, sections, metadata = {}, lang = 'he', options = {} } = req.body;
 
-  if (!Array.isArray(sections) || sections.length === 0) {
+  let parsedSections = sections;
+  if (typeof sections === 'string') {
+    try {
+      parsedSections = JSON.parse(sections);
+    } catch {
+      return res.status(400).json({ error: 'sections must be a valid JSON array' });
+    }
+  }
+
+  if (!Array.isArray(parsedSections) || parsedSections.length === 0) {
     return res.status(400).json({ error: 'sections array is required and must not be empty' });
   }
 
   try {
     const css = buildCSS(styles);
-    const html = buildHTML(css, sections, metadata, styles, lang);
+    const html = buildHTML(css, parsedSections, metadata, styles, lang);
     const pdfBuffer = await generatePDF(html, {
       page_size: options.page_size,
       orientation: options.orientation,
