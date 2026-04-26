@@ -52,6 +52,21 @@ function renderSection(section) {
     return `<img class="section-image" src="${escapeHtml(section.url)}" alt="${escapeHtml(section.caption || '')}">${caption}`;
   }
 
+  if (type === 'lesson_details') {
+    const fields = [
+      { label: 'זמן', value: section.time },
+      { label: 'דרגת קושי', value: section.level },
+      { label: 'צורת ישיבה', value: section.sitting },
+      { label: 'התערבות', value: section.intervention },
+    ].filter(f => f.value);
+
+    const items = fields
+      .map(f => `<span class="ld-item"><strong>${escapeHtml(f.label)}</strong> ${escapeHtml(f.value)}</span>`)
+      .join('');
+
+    return `<div class="lesson-details"><span class="ld-arrow">&lt;&lt;</span>${items}<span class="ld-arrow">&gt;&gt;</span></div>`;
+  }
+
   if (type === 'divider') {
     return `<hr class="divider">`;
   }

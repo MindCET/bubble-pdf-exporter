@@ -152,6 +152,25 @@ ${tableCSS}
 ${headerCSS}
 
 ${footerCSS}
+
+.lesson-details {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-size: 13px;
+  padding: 6px 0;
+  direction: rtl;
+}
+.ld-arrow {
+  font-weight: 700;
+  color: #555;
+}
+.ld-item strong {
+  font-weight: 700;
+}
+.ld-item {
+  font-weight: 400;
+}
 `.trim();
 }
 
