@@ -34,7 +34,9 @@ app.post('/export-pdf', async (req, res) => {
   let parsedSections = sections;
   if (typeof sections === 'string') {
     try {
-      parsedSections = JSON.parse(sections);
+      // Bubble sends literal \" — strip the backslashes before parsing
+      const cleaned = sections.replace(/\\"/g, '"');
+      parsedSections = JSON.parse(cleaned);
     } catch {
       return res.status(400).json({ error: 'sections must be a valid JSON array' });
     }
@@ -51,6 +53,8 @@ app.post('/export-pdf', async (req, res) => {
       page_size: options.page_size,
       orientation: options.orientation,
       margin: options.margin || styles.page?.margin,
+      header: styles.header || options.header,
+      footer: styles.footer || options.footer,
     });
 
     res.setHeader('Content-Type', 'application/pdf');

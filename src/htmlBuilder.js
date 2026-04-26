@@ -68,39 +68,8 @@ function renderSection(section) {
   return '';
 }
 
-function buildHeader(metadata, styles) {
-  const header = styles?.header || {};
-  if (!header.show && !metadata?.title) return '';
-
-  const logo = header.logo_url
-    ? `<img src="${escapeHtml(header.logo_url)}" alt="logo">`
-    : '';
-
-  const title = metadata?.title
-    ? `<span class="header-title">${escapeHtml(metadata.title)}</span>`
-    : '';
-
-  const date = metadata?.date
-    ? `<span class="header-date">${escapeHtml(metadata.date)}</span>`
-    : '';
-
-  if (!logo && !title && !date) return '';
-
-  return `<div class="page-header">${logo}<div>${title}${date ? ' — ' + date : ''}</div></div>`;
-}
-
-function buildFooter(metadata, styles) {
-  const footer = styles?.footer || {};
-  if (!footer.text && !footer.show_page_number) return '';
-
-  const text = footer.text ? escapeHtml(footer.text) : '';
-  return `<div class="page-footer">${text}</div>`;
-}
-
 function buildHTML(css, sections, metadata, styles, lang) {
   const dir = lang === 'he' || lang === 'ar' ? 'rtl' : 'ltr';
-  const header = buildHeader(metadata, styles);
-  const footer = buildFooter(metadata, styles);
   const content = sections.map(renderSection).join('\n');
 
   return `<!DOCTYPE html>
@@ -112,11 +81,9 @@ function buildHTML(css, sections, metadata, styles, lang) {
   <style>${css}</style>
 </head>
 <body>
-  ${header}
   <div class="page-content">
     ${content}
   </div>
-  ${footer}
 </body>
 </html>`;
 }
