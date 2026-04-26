@@ -163,7 +163,7 @@ ${footerCSS}
 }
 .ld-arrow {
   font-weight: 700;
-  color: #555;
+  color: #e5791f;
 }
 .ld-item strong {
   font-weight: 700;
