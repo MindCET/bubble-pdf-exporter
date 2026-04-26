@@ -64,7 +64,7 @@ function renderSection(section) {
       .map(f => `<span class="ld-item"><strong>${escapeHtml(f.label)}</strong> ${escapeHtml(f.value)}</span>`)
       .join('');
 
-    return `<div class="lesson-details"><span class="ld-arrow">&lt;&lt;</span>${items}<span class="ld-arrow">&gt;&gt;</span></div>`;
+    return `<div class="lesson-details"><span class="ld-arrow">&gt;&gt;</span>${items}<span class="ld-arrow">&lt;&lt;</span></div>`;
   }
 
   if (type === 'divider') {
