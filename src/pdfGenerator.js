@@ -55,7 +55,8 @@ function toMm(value) {
 
 function buildImageTemplate(base64Url, height) {
   if (!base64Url) return '<span></span>';
-  return `<div style="width:100%;margin:0;padding:0;line-height:0;">
+  return `<style>* { margin: 0; padding: 0; } body { margin: 0 !important; }</style>
+  <div style="width:100%;line-height:0;">
     <img src="${base64Url}" style="width:100%;height:auto;display:block;">
   </div>`;
 }
