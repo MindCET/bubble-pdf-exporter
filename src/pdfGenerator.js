@@ -56,8 +56,8 @@ function toMm(value) {
 function buildImageTemplate(base64Url, height) {
   if (!base64Url) return '<span></span>';
   return `<style>* { margin: 0; padding: 0; } body { margin: 0 !important; }</style>
-  <div style="width:100%;line-height:0;">
-    <img src="${base64Url}" style="width:100%;height:auto;display:block;">
+  <div style="width:100%;height:${height};overflow:hidden;line-height:0;">
+    <img src="${base64Url}" style="width:100%;height:100%;object-fit:cover;display:block;">
   </div>`;
 }
 
@@ -90,8 +90,8 @@ async function generatePDF(html, options = {}) {
       headerTemplate: hasHeader ? buildImageTemplate(headerUrl, headerHeight) : '<span></span>',
       footerTemplate: hasFooter ? buildImageTemplate(footerUrl, footerHeight) : '<span></span>',
       margin: {
-        top: hasHeader ? `${toMm(headerHeight) + 15}mm` : baseMargin,
-        bottom: hasFooter ? `${toMm(footerHeight) + 15}mm` : baseMargin,
+        top: hasHeader ? `${toMm(headerHeight) + 5}mm` : baseMargin,
+        bottom: hasFooter ? `${toMm(footerHeight) + 5}mm` : baseMargin,
         left: baseMargin,
         right: baseMargin,
       },
