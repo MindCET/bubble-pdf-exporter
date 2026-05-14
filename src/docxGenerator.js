@@ -251,7 +251,26 @@ async function generateDOCX(sections, metadata = {}, styles = {}) {
     }],
   });
 
-  return Packer.toBuffer(doc);
+  const buffer = await Packer.toBuffer(doc);
+  return injectRtlSettings(buffer);
+}
+
+// Post-process: inject <w:bidi/> into sectPr and settings.xml
+async function injectRtlSettings(buffer) {
+  const JSZip = require('jszip');
+  const zip = await JSZip.loadAsync(buffer);
+
+  // 1. Inject <w:bidi/> into sectPr in document.xml
+  const docXml = await zip.file('word/document.xml').async('string');
+  const patchedDoc = docXml.replace(/<w:sectPr>/, '<w:sectPr><w:bidi/>');
+  zip.file('word/document.xml', patchedDoc);
+
+  // 2. Inject <w:bidi/> into settings.xml
+  const settingsXml = await zip.file('word/settings.xml').async('string');
+  const patchedSettings = settingsXml.replace('</w:settings>', '<w:bidi/></w:settings>');
+  zip.file('word/settings.xml', patchedSettings);
+
+  return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
 }
 
 module.exports = { generateDOCX };
