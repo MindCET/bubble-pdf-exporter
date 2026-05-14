@@ -255,20 +255,50 @@ async function generateDOCX(sections, metadata = {}, styles = {}) {
   return injectRtlSettings(buffer);
 }
 
-// Post-process: inject <w:bidi/> into sectPr and settings.xml
+// Post-process: force RTL on every paragraph + section + settings
 async function injectRtlSettings(buffer) {
   const JSZip = require('jszip');
   const zip = await JSZip.loadAsync(buffer);
 
-  // 1. Inject <w:bidi/> into sectPr in document.xml
-  const docXml = await zip.file('word/document.xml').async('string');
-  const patchedDoc = docXml.replace(/<w:sectPr>/, '<w:sectPr><w:bidi/>');
-  zip.file('word/document.xml', patchedDoc);
+  let docXml = await zip.file('word/document.xml').async('string');
 
-  // 2. Inject <w:bidi/> into settings.xml
+  // 1. Force <w:bidi/> and <w:jc w:val="right"/> on every paragraph that doesn't already have them.
+  //    Match every <w:pPr>...</w:pPr> and rewrite.
+  docXml = docXml.replace(/<w:pPr>([\s\S]*?)<\/w:pPr>/g, (match, inner) => {
+    let result = inner;
+    if (!/<w:bidi\b/.test(result)) result = '<w:bidi/>' + result;
+    if (!/<w:jc\b/.test(result)) {
+      result += '<w:jc w:val="right"/>';
+    } else {
+      // Replace any non-right alignment with right (except center, which we want to keep for copyright)
+      result = result.replace(/<w:jc w:val="left"\/>/g, '<w:jc w:val="right"/>');
+      result = result.replace(/<w:jc w:val="start"\/>/g, '<w:jc w:val="right"/>');
+    }
+    return `<w:pPr>${result}</w:pPr>`;
+  });
+
+  // 2. Paragraphs without any <w:pPr> at all → add one
+  docXml = docXml.replace(/<w:p>(?!<w:pPr)/g, '<w:p><w:pPr><w:bidi/><w:jc w:val="right"/></w:pPr>');
+
+  // 3. Force <w:rtl/> on every run
+  docXml = docXml.replace(/<w:rPr>([\s\S]*?)<\/w:rPr>/g, (match, inner) => {
+    if (/<w:rtl\b/.test(inner)) return match;
+    return `<w:rPr>${inner}<w:rtl/></w:rPr>`;
+  });
+
+  // 4. Inject <w:bidi/> at end of sectPr (just before close)
+  docXml = docXml.replace(/<\/w:sectPr>/g, '<w:bidi/></w:sectPr>');
+  // Remove duplicates if docx-js already added one
+  docXml = docXml.replace(/(<w:bidi\/>)+/g, '<w:bidi/>');
+
+  zip.file('word/document.xml', docXml);
+
+  // 5. Inject <w:bidi/> into settings.xml
   const settingsXml = await zip.file('word/settings.xml').async('string');
-  const patchedSettings = settingsXml.replace('</w:settings>', '<w:bidi/></w:settings>');
-  zip.file('word/settings.xml', patchedSettings);
+  if (!/<w:bidi\b/.test(settingsXml)) {
+    const patchedSettings = settingsXml.replace('</w:settings>', '<w:bidi/></w:settings>');
+    zip.file('word/settings.xml', patchedSettings);
+  }
 
   return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
 }
