@@ -249,23 +249,24 @@ async function injectRtlSettings(buffer) {
 
   let docXml = await zip.file('word/document.xml').async('string');
 
-  // 1. Force <w:bidi/> and <w:jc w:val="right"/> on every paragraph that doesn't already have them.
-  //    Match every <w:pPr>...</w:pPr> and rewrite.
+  // Word RTL quirk: in a bidi paragraph, <w:jc w:val="right"/> can be interpreted as visual
+  // left ("end of reading direction"). Use "start" (= visual right in RTL) instead.
+  // 1. Force <w:bidi/> and <w:jc w:val="start"/> on every pPr (preserve center alignment).
   docXml = docXml.replace(/<w:pPr>([\s\S]*?)<\/w:pPr>/g, (match, inner) => {
     let result = inner;
     if (!/<w:bidi\b/.test(result)) result = '<w:bidi/>' + result;
     if (!/<w:jc\b/.test(result)) {
-      result += '<w:jc w:val="right"/>';
+      result += '<w:jc w:val="start"/>';
     } else {
-      // Replace any non-right alignment with right (except center, which we want to keep for copyright)
-      result = result.replace(/<w:jc w:val="left"\/>/g, '<w:jc w:val="right"/>');
-      result = result.replace(/<w:jc w:val="start"\/>/g, '<w:jc w:val="right"/>');
+      // Keep center, swap right→start (= visual right in RTL)
+      result = result.replace(/<w:jc w:val="right"\/>/g, '<w:jc w:val="start"/>');
+      result = result.replace(/<w:jc w:val="left"\/>/g, '<w:jc w:val="start"/>');
     }
     return `<w:pPr>${result}</w:pPr>`;
   });
 
   // 2. Paragraphs without any <w:pPr> at all → add one
-  docXml = docXml.replace(/<w:p>(?!<w:pPr)/g, '<w:p><w:pPr><w:bidi/><w:jc w:val="right"/></w:pPr>');
+  docXml = docXml.replace(/<w:p>(?!<w:pPr)/g, '<w:p><w:pPr><w:bidi/><w:jc w:val="start"/></w:pPr>');
 
   // 3. Force <w:rtl/> on every run
   docXml = docXml.replace(/<w:rPr>([\s\S]*?)<\/w:rPr>/g, (match, inner) => {
