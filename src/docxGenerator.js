@@ -209,25 +209,7 @@ async function generateDOCX(sections, metadata = {}, styles = {}) {
     styles: {
       default: {
         document: { run: { font: fontFamily, size: 24, rightToLeft: true } },
-        paragraph: { alignment: AlignmentType.RIGHT },
       },
-      paragraphStyles: [
-        { id: 'Normal', name: 'Normal', quickFormat: true,
-          run: { font: fontFamily, size: 24, rightToLeft: true },
-          paragraph: { alignment: AlignmentType.RIGHT, bidirectional: true } },
-        { id: 'Heading1', name: 'Heading 1', basedOn: 'Normal', next: 'Normal', quickFormat: true,
-          run: { size: 40, bold: true, font: fontFamily, color: page.color?.replace('#', '') || '333333' },
-          paragraph: { spacing: { before: 240, after: 120 }, outlineLevel: 0, bidirectional: true, alignment: AlignmentType.RIGHT } },
-        { id: 'Heading2', name: 'Heading 2', basedOn: 'Normal', next: 'Normal', quickFormat: true,
-          run: { size: 32, bold: true, font: fontFamily, color: page.color?.replace('#', '') || '333333' },
-          paragraph: { spacing: { before: 200, after: 100 }, outlineLevel: 1, bidirectional: true, alignment: AlignmentType.RIGHT } },
-        { id: 'Heading3', name: 'Heading 3', basedOn: 'Normal', next: 'Normal', quickFormat: true,
-          run: { size: 28, bold: true, font: fontFamily },
-          paragraph: { spacing: { before: 160, after: 80 }, outlineLevel: 2, bidirectional: true, alignment: AlignmentType.RIGHT } },
-        { id: 'Heading4', name: 'Heading 4', basedOn: 'Normal', next: 'Normal', quickFormat: true,
-          run: { size: 24, bold: true, font: fontFamily },
-          paragraph: { spacing: { before: 120, after: 60 }, outlineLevel: 3, bidirectional: true, alignment: AlignmentType.RIGHT } },
-      ],
     },
     numbering: {
       config: [
